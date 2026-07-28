@@ -186,6 +186,22 @@
     color:#aaa;
     margin-top:6px;
   }
+  .hint{
+    text-align:center;
+    font-size:11px;
+    color:#c9c9c9;
+    margin-top:4px;
+  }
+  .manual-tag{
+    display:inline-block;
+    background:#fff4e5;
+    color:var(--orange);
+    font-size:11px;
+    font-weight:600;
+    padding:2px 8px;
+    border-radius:10px;
+    margin-left:8px;
+  }
 </style>
 </head>
 <body>
@@ -219,6 +235,7 @@
 
   <div class="status-banner" id="statusBanner"></div>
   <div class="clock" id="clock"></div>
+  <div class="hint">Mẹo: nhấn <b>Ctrl + F1</b> ba lần liên tiếp để chuyển sang mốc tiếp theo (chế độ demo thủ công)</div>
 </div>
 
 <script>
@@ -245,11 +262,39 @@ function formatDate(d){
   return `${d.getDate()} Th${d.getMonth()+1} ${d.getFullYear()}`;
 }
 
+// manualIndex = null  -> chế độ tự động, dựa theo ngày giờ thực
+// manualIndex = số nguyên -> chế độ thủ công (demo), chỉ hiển thị N sự kiện đầu tiên
+let manualIndex = null;
+let pressCount = 0;
+
+function getHappenedEvents(now){
+  if(manualIndex !== null){
+    return events.slice(0, manualIndex);
+  }
+  return events.filter(e => new Date(e.date) <= now);
+}
+
+document.addEventListener('keydown', (e)=>{
+  if(e.ctrlKey && e.key === 'F1'){
+    e.preventDefault();
+    pressCount++;
+    if(pressCount >= 3){
+      pressCount = 0;
+      if(manualIndex === null){
+        // khởi tạo mốc thủ công dựa trên trạng thái hiện tại (theo ngày thực)
+        manualIndex = getHappenedEvents(new Date()).length;
+      }
+      manualIndex = Math.min(manualIndex + 1, events.length);
+      render();
+    }
+  }
+});
+
 function render(){
   const now = new Date();
 
-  // các sự kiện đã xảy ra tính đến hiện tại
-  const happened = events.filter(e => new Date(e.date) <= now);
+  // các sự kiện đã xảy ra tính đến hiện tại (hoặc theo chế độ thủ công)
+  const happened = getHappenedEvents(now);
 
   // trạng thái (stage) hiện tại = stage lớn nhất trong các sự kiện đã xảy ra
   let currentStage = -1;
@@ -294,8 +339,9 @@ function render(){
     tl.appendChild(item);
   });
 
-  document.getElementById('statusBanner').textContent =
-    `Trạng thái hiện tại: ${stageLabels[currentStage]}`;
+  document.getElementById('statusBanner').innerHTML =
+    `Trạng thái hiện tại: ${stageLabels[currentStage]}` +
+    (manualIndex !== null ? `<span class="manual-tag">Chế độ thủ công · bước ${manualIndex}/${events.length}</span>` : '');
   document.getElementById('clock').textContent =
     `Cập nhật lúc ${formatTime(now)} - ${formatDate(now)}`;
 }
