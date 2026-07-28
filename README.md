@@ -1,1 +1,315 @@
-404 NOT FOUND
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Theo dõi đơn hàng</title>
+<style>
+  :root{
+    --orange:#ee4d2d;
+    --orange-soft:#fdece7;
+    --grey-line:#e5e5e5;
+    --grey-text:#767676;
+    --blue-link:#0d6efd;
+    --dark:#222;
+    --green:#26aa4b;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:#f5f5f5;
+    color:var(--dark);
+    padding:24px 12px 60px;
+  }
+  .card{
+    max-width:760px;
+    margin:0 auto;
+    background:#fff;
+    border-radius:8px;
+    padding:32px 28px 40px;
+    box-shadow:0 1px 3px rgba(0,0,0,.08);
+  }
+  .order-id{
+    font-size:13px;
+    color:var(--grey-text);
+    margin-bottom:24px;
+  }
+
+  /* ---- Stepper ---- */
+  .stepper{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    margin-bottom:36px;
+  }
+  .step{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    flex:1;
+    position:relative;
+  }
+  .step .icon{
+    width:44px;
+    height:44px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#fafafa;
+    color:#bbb;
+    font-size:20px;
+    z-index:2;
+    transition:all .4s ease;
+  }
+  .step .label{
+    margin-top:10px;
+    font-size:13px;
+    color:#bbb;
+    text-align:center;
+    transition:color .4s ease;
+    max-width:100px;
+  }
+  .step .connector{
+    position:absolute;
+    top:22px;
+    left:50%;
+    width:100%;
+    height:2px;
+    background:var(--grey-line);
+    z-index:1;
+  }
+  .step:last-child .connector{display:none;}
+
+  .step.done .icon{
+    background:var(--orange-soft);
+    color:var(--orange);
+  }
+  .step.done .label{color:var(--orange);}
+  .step.done .connector{background:var(--orange);}
+
+  .step.active .icon{
+    background:var(--orange);
+    color:#fff;
+    box-shadow:0 0 0 6px var(--orange-soft);
+    animation:pulse 1.8s ease-in-out infinite;
+  }
+  .step.active .label{color:var(--orange); font-weight:600;}
+
+  @keyframes pulse{
+    0%,100%{box-shadow:0 0 0 6px var(--orange-soft);}
+    50%{box-shadow:0 0 0 10px var(--orange-soft);}
+  }
+
+  /* ---- Timeline ---- */
+  .timeline{
+    position:relative;
+    padding-left:30px;
+  }
+  .tl-item{
+    position:relative;
+    padding-bottom:26px;
+  }
+  .tl-item:last-child{padding-bottom:0;}
+  .tl-item::before{
+    content:"";
+    position:absolute;
+    left:-22px;
+    top:4px;
+    bottom:-22px;
+    width:1px;
+    background:var(--grey-line);
+  }
+  .tl-item:last-child::before{display:none;}
+
+  .tl-dot{
+    position:absolute;
+    left:-30px;
+    top:2px;
+    width:16px;
+    height:16px;
+    border-radius:50%;
+    background:#fff;
+    border:2px solid #bbb;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .tl-item.latest .tl-dot{
+    border-color:var(--green);
+    background:var(--green);
+  }
+  .tl-item.latest .tl-dot::after{
+    content:"✓";
+    color:#fff;
+    font-size:10px;
+    font-weight:bold;
+  }
+  .tl-item.in-progress .tl-dot{
+    border-color:var(--orange);
+    background:var(--orange);
+  }
+  .tl-item.plain .tl-dot{
+    width:14px;height:14px;left:-29px;
+    border:1px solid #bbb;
+  }
+  .tl-time{
+    font-size:12px;
+    color:var(--grey-text);
+    margin-bottom:2px;
+  }
+  .tl-text{
+    font-size:14px;
+    color:var(--blue-link);
+  }
+  .tl-item.latest .tl-text{
+    color:var(--dark);
+    font-weight:600;
+  }
+  .tl-item.in-progress .tl-text{
+    color:var(--dark);
+    font-weight:600;
+  }
+
+
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="order-id">Mã đơn hàng: SPXVN0000000000</div>
+
+  <div class="stepper" id="stepper">
+    <div class="step" data-stage="0">
+      <div class="connector"></div>
+      <div class="icon">📋</div>
+      <div class="label">Chờ lấy hàng</div>
+    </div>
+    <div class="step" data-stage="1">
+      <div class="connector"></div>
+      <div class="icon">🚚</div>
+      <div class="label">Đang vận chuyển</div>
+    </div>
+    <div class="step" data-stage="2">
+      <div class="connector"></div>
+      <div class="icon">🛵</div>
+      <div class="label">Đang giao hàng</div>
+    </div>
+    <div class="step" data-stage="3">
+      <div class="icon">📦</div>
+      <div class="label">Đã giao hàng</div>
+    </div>
+  </div>
+
+  <div class="timeline" id="timeline"></div>
+</div>
+
+<script>
+// Danh sách sự kiện: stage = trạng thái được kích hoạt SAU khi sự kiện này xảy ra
+// stage 0 = Chờ lấy hàng, 1 = Đang vận chuyển, 2 = Đang giao hàng, 3 = Đã giao hàng
+const events = [
+  { date: "2026-07-28T08:31:27", stage: 0, text: "Người bán đang chuẩn bị hàng" },
+  { date: "2026-07-29T11:42:13", stage: 1, text: "Lấy hàng thành công" },
+  { date: "2026-07-30T12:36:09", stage: 1, text: "Đang vận chuyển" },
+  { date: "2026-07-31T04:30:06", stage: 1, text: "Đơn hàng đã đến kho BN-B Mega SOC" },
+  { date: "2026-07-31T09:12:35", stage: 1, text: "Đơn hàng đã rời kho" },
+  { date: "2026-08-01T10:30:15", stage: 1, text: "Đơn hàng đã đến Bưu cục NASPX09" },
+  { date: "2026-08-03T21:02:43", stage: 1, text: "Đơn hàng đã đến Bưu cục DNSPX" },
+  { date: "2026-08-04T06:45:00", stage: 2, text: "Đang giao hàng" },
+];
+
+const stageLabels = ["Chờ lấy hàng", "Đang vận chuyển", "Đang giao hàng", "Đã giao hàng"];
+
+function formatTime(d){
+  const pad = n => String(n).padStart(2,"0");
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+function formatDate(d){
+  return `${d.getDate()} Th${d.getMonth()+1} ${d.getFullYear()}`;
+}
+
+// manualIndex = null  -> chế độ tự động, dựa theo ngày giờ thực
+// manualIndex = số nguyên -> chế độ thủ công (demo), chỉ hiển thị N sự kiện đầu tiên
+let manualIndex = null;
+let pressCount = 0;
+
+function getHappenedEvents(now){
+  if(manualIndex !== null){
+    return events.slice(0, manualIndex);
+  }
+  return events.filter(e => new Date(e.date) <= now);
+}
+
+document.addEventListener('keydown', (e)=>{
+  if(e.ctrlKey && e.key === 'F1'){
+    e.preventDefault();
+    pressCount++;
+    if(pressCount >= 3){
+      pressCount = 0;
+      if(manualIndex === null){
+        // khởi tạo mốc thủ công dựa trên trạng thái hiện tại (theo ngày thực)
+        manualIndex = getHappenedEvents(new Date()).length;
+      }
+      manualIndex = Math.min(manualIndex + 1, events.length);
+      render();
+    }
+  }
+});
+
+function render(){
+  const now = new Date();
+
+  // các sự kiện đã xảy ra tính đến hiện tại (hoặc theo chế độ thủ công)
+  const happened = getHappenedEvents(now);
+
+  // trạng thái (stage) hiện tại = stage lớn nhất trong các sự kiện đã xảy ra
+  let currentStage = -1;
+  happened.forEach(e => { if(e.stage > currentStage) currentStage = e.stage; });
+  if(currentStage < 0) currentStage = 0;
+
+  // cập nhật thanh trạng thái phía trên
+  document.querySelectorAll('.step').forEach(stepEl=>{
+    const s = parseInt(stepEl.dataset.stage,10);
+    stepEl.classList.remove('done','active');
+    const icon = stepEl.querySelector('.icon');
+    if(s < currentStage){
+      stepEl.classList.add('done');
+      icon.textContent = '✓';
+    } else if(s === currentStage){
+      stepEl.classList.add('active');
+      icon.textContent = ['📋','🚚','🛵','📦'][s];
+    } else {
+      icon.textContent = ['📋','🚚','🛵','📦'][s];
+    }
+  });
+
+  // vẽ timeline (mới nhất ở trên)
+  const tl = document.getElementById('timeline');
+  tl.innerHTML = '';
+  const sorted = [...happened].sort((a,b)=> new Date(b.date) - new Date(a.date));
+
+  sorted.forEach((e, idx)=>{
+    const d = new Date(e.date);
+    const item = document.createElement('div');
+    item.className = 'tl-item';
+    if(idx === 0){
+      item.classList.add(e.stage === 3 ? 'latest' : 'in-progress');
+    } else {
+      item.classList.add('plain');
+    }
+    item.innerHTML = `
+      <span class="tl-dot"></span>
+      <div class="tl-time">${formatTime(d)}<br>${formatDate(d)}</div>
+      <div class="tl-text">${e.text}</div>
+    `;
+    tl.appendChild(item);
+  });
+}
+
+render();
+setInterval(render, 1000);
+</script>
+
+</body>
+</html>
