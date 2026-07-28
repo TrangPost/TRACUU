@@ -172,42 +172,13 @@
     font-weight:600;
   }
 
-  .status-banner{
-    font-size:13px;
-    color:var(--grey-text);
-    text-align:center;
-    margin-top:28px;
-    padding-top:16px;
-    border-top:1px dashed var(--grey-line);
-  }
-  .clock{
-    text-align:center;
-    font-size:12px;
-    color:#aaa;
-    margin-top:6px;
-  }
-  .hint{
-    text-align:center;
-    font-size:11px;
-    color:#c9c9c9;
-    margin-top:4px;
-  }
-  .manual-tag{
-    display:inline-block;
-    background:#fff4e5;
-    color:var(--orange);
-    font-size:11px;
-    font-weight:600;
-    padding:2px 8px;
-    border-radius:10px;
-    margin-left:8px;
-  }
+
 </style>
 </head>
 <body>
 
 <div class="card">
-  <div class="order-id">Mã đơn hàng: SPXVN0000000000</div>
+  <div class="order-id">Mã đơn hàng: TRANG2984234975607401274027356</div>
 
   <div class="stepper" id="stepper">
     <div class="step" data-stage="0">
@@ -232,10 +203,6 @@
   </div>
 
   <div class="timeline" id="timeline"></div>
-
-  <div class="status-banner" id="statusBanner"></div>
-  <div class="clock" id="clock"></div>
-  <div class="hint">Mẹo: nhấn <b>Ctrl + F1</b> ba lần liên tiếp để chuyển sang mốc tiếp theo (chế độ demo thủ công)</div>
 </div>
 
 <script>
@@ -338,12 +305,6 @@ function render(){
     `;
     tl.appendChild(item);
   });
-
-  document.getElementById('statusBanner').innerHTML =
-    `Trạng thái hiện tại: ${stageLabels[currentStage]}` +
-    (manualIndex !== null ? `<span class="manual-tag">Chế độ thủ công · bước ${manualIndex}/${events.length}</span>` : '');
-  document.getElementById('clock').textContent =
-    `Cập nhật lúc ${formatTime(now)} - ${formatDate(now)}`;
 }
 
 render();
